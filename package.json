@@ -1,21 +1,23 @@
 {
-  "name": "backpack-koa",
+  "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Backend API with PostgreSQL",
+  "main": "src/index.js",
   "scripts": {
-    "start": "backpack"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
   },
-  "keywords": [],
-  "author": "ilazar",
-  "license": "",
   "dependencies": {
-    "backpack-core": "^0.8.4",
-    "koa": "^2.8.2",
-    "koa-bodyparser": "^4.2.1",
-    "koa-convert": "^1.2.0",
+    "dotenv": "^17.2.3",
+    "koa": "^2.14.2",
+    "koa-bodyparser": "^4.4.0",
     "koa-cors": "^0.0.16",
-    "koa-router": "^7.4.0",
-    "ws": "^7.1.2"
+    "koa-router": "^12.0.0",
+    "pg": "^8.11.0",
+    "sequelize": "^6.35.0",
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
