@@ -1,11 +1,9 @@
-// User Validator pentru autentificare
 class UserValidator {
   
-  // Validare register
   static validateRegister(userData) {
     const errors = [];
     
-    // Validare username
+
     if (!userData.username) {
       errors.push('Username is required');
     } else if (typeof userData.username !== 'string') {
@@ -16,7 +14,6 @@ class UserValidator {
       errors.push('Username must be less than 50 characters');
     }
     
-    // Validare email
     if (!userData.email) {
       errors.push('Email is required');
     } else if (typeof userData.email !== 'string') {
@@ -25,7 +22,6 @@ class UserValidator {
       errors.push('Email is not valid');
     }
     
-    // Validare password
     if (!userData.password) {
       errors.push('Password is required');
     } else if (typeof userData.password !== 'string') {
@@ -40,7 +36,6 @@ class UserValidator {
     };
   }
   
-  // Validare login
   static validateLogin(userData) {
     const errors = [];
     
@@ -58,7 +53,6 @@ class UserValidator {
     };
   }
   
-  // Verifică dacă email-ul e valid
   static isValidEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);

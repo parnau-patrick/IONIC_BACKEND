@@ -1,11 +1,9 @@
 // Item Validator - exact ca în proiectul original
 class ItemValidator {
   
-  // Validare completă item
   static validate(item) {
     const errors = [];
     
-    // Validare text
     if (!item.text) {
       errors.push('Text is required');
     } else if (typeof item.text !== 'string') {
@@ -18,14 +16,12 @@ class ItemValidator {
       errors.push('Text must be at least 3 characters');
     }
     
-    // Validare completed
     if (item.completed !== undefined && item.completed !== null) {
       if (typeof item.completed !== 'boolean') {
         errors.push('Completed must be a boolean');
       }
     }
-    
-    // Validare version
+
     if (item.version !== undefined && item.version !== null) {
       if (typeof item.version !== 'number') {
         errors.push('Version must be a number');
@@ -40,7 +36,6 @@ class ItemValidator {
     };
   }
   
-  // Validare pentru create (nu e nevoie de version)
   static validateForCreate(itemData) {
     const item = {
       text: itemData.text,
@@ -50,12 +45,10 @@ class ItemValidator {
     return this.validate(item);
   }
   
-  // Validare pentru update (include tot)
   static validateForUpdate(itemData) {
     return this.validate(itemData);
   }
   
-  // Validare ID
   static validateId(id) {
     const errors = [];
     
@@ -69,7 +62,6 @@ class ItemValidator {
     };
   }
   
-  // Validare search text
   static validateSearchText(text) {
     const errors = [];
     
@@ -87,7 +79,6 @@ class ItemValidator {
     };
   }
   
-  // Validare version conflict (optimistic locking)
   static validateVersionConflict(clientVersion, serverVersion) {
     if (!clientVersion || !serverVersion) {
       return { hasConflict: false };
@@ -103,7 +94,6 @@ class ItemValidator {
     };
   }
 
-  // Validare pagination parameters
   static validatePagination(page, limit) {
     const errors = [];
     

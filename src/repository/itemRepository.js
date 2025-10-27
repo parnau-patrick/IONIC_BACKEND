@@ -1,10 +1,8 @@
 const Item = require('../models/item');
 const { Op } = require('sequelize');
 
-// Item Repository - exact ca în proiectul original dar cu suport pentru userId
 class ItemRepository {
   
-  // Găsește toate item-urile pentru un user, cu paginare
   async findAll(userId, page = 1, limit = 10) {
     const offset = (page - 1) * limit;
     
@@ -24,14 +22,12 @@ class ItemRepository {
     };
   }
 
-  // Găsește item după ID și userId (pentru securitate)
   async findById(id, userId) {
     return await Item.findOne({
       where: { id, userId }
     });
   }
 
-  // Găsește items după text (search) pentru un user
   async findByText(searchText, userId, page = 1, limit = 10) {
     const offset = (page - 1) * limit;
     
@@ -56,7 +52,6 @@ class ItemRepository {
     };
   }
 
-  // Găsește items după completed status
   async findByCompleted(completed, userId, page = 1, limit = 10) {
     const offset = (page - 1) * limit;
     
@@ -76,12 +71,10 @@ class ItemRepository {
     };
   }
 
-  // Salvează un item nou
   async save(itemData) {
     return await Item.create(itemData);
   }
 
-  // Update item
   async update(id, userId, itemData) {
     const item = await this.findById(id, userId);
     if (!item) return null;
@@ -90,7 +83,6 @@ class ItemRepository {
     return item;
   }
 
-  // Delete item
   async delete(id, userId) {
     const item = await this.findById(id, userId);
     if (!item) return null;
@@ -99,7 +91,6 @@ class ItemRepository {
     return item;
   }
 
-  // Verifică dacă există un item
   async exists(id, userId) {
     const count = await Item.count({ 
       where: { id, userId } 
@@ -107,7 +98,6 @@ class ItemRepository {
     return count > 0;
   }
 
-  // Obține ultima dată de update pentru un user
   async getLastUpdated(userId) {
     const item = await Item.findOne({
       where: { userId },
@@ -116,7 +106,6 @@ class ItemRepository {
     return item ? item.updatedAt : new Date();
   }
 
-  // Numără item-urile pentru un user
   async count(userId) {
     return await Item.count({ 
       where: { userId } 

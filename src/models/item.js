@@ -1,7 +1,6 @@
 const { DataTypes } = require('sequelize');
 const database = require('../config/database');
 
-// Item Model - exact ca în proiectul original dar cu userId
 const Item = database.getSequelize().define('Item', {
   id: {
     type: DataTypes.INTEGER,
@@ -42,12 +41,10 @@ const Item = database.getSequelize().define('Item', {
   timestamps: true 
 });
 
-// Method pentru toggle completed (ca în original)
 Item.prototype.toggleCompleted = function() {
   this.completed = !this.completed;
 };
 
-// Method pentru incrementare versiune (ca în original)
 Item.prototype.incrementVersion = function() {
   this.version += 1;
 };

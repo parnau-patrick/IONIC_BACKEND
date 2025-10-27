@@ -1,16 +1,14 @@
 const jwt = require('jsonwebtoken');
 const UserValidator = require('../validation/userValidator');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'my-secret-key-for-university-project';
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = '7d'; 
 
-// Auth Service - business logic pentru autentificare
 class AuthService {
   constructor(userRepository) {
     this.repository = userRepository;
   }
 
-  // Generează JWT token
   generateToken(userId) {
     return jwt.sign(
       { userId },
@@ -19,7 +17,6 @@ class AuthService {
     );
   }
 
-  // Verifică JWT token
   verifyToken(token) {
     try {
       return jwt.verify(token, JWT_SECRET);
@@ -31,9 +28,7 @@ class AuthService {
     }
   }
 
-  // Register user nou
   async register(userData) {
-    // Validare input
     const validation = UserValidator.validateRegister(userData);
     if (!validation.isValid) {
       throw {
@@ -42,7 +37,6 @@ class AuthService {
       };
     }
 
-    // Verifică dacă username sau email există deja
     const existingUser = await this.repository.findByUsernameOrEmail(
       userData.username,
       userData.email
@@ -55,14 +49,12 @@ class AuthService {
       };
     }
 
-    // Creează user (password va fi hash-uit automat în model)
     const user = await this.repository.create({
       username: userData.username,
       email: userData.email,
       password: userData.password
     });
 
-    // Generează token
     const token = this.generateToken(user.id);
 
     return {
@@ -75,9 +67,7 @@ class AuthService {
     };
   }
 
-  // Login user
   async login(userData) {
-    // Validare input
     const validation = UserValidator.validateLogin(userData);
     if (!validation.isValid) {
       throw {
@@ -86,7 +76,6 @@ class AuthService {
       };
     }
 
-    // Găsește user după username
     const user = await this.repository.findByUsername(userData.username);
 
     if (!user) {
@@ -96,7 +85,6 @@ class AuthService {
       };
     }
 
-    // Verifică password
     const isMatch = await user.comparePassword(userData.password);
 
     if (!isMatch) {
@@ -106,7 +94,6 @@ class AuthService {
       };
     }
 
-    // Generează token
     const token = this.generateToken(user.id);
 
     return {
@@ -119,7 +106,6 @@ class AuthService {
     };
   }
 
-  // Obține user curent
   async getCurrentUser(userId) {
     const user = await this.repository.findById(userId);
 

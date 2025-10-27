@@ -4,7 +4,6 @@ class AuthController {
     this.service = authService;
   }
 
-  // Register user nou
   async register(ctx) {
     try {
       const userData = ctx.request.body;
@@ -17,7 +16,6 @@ class AuthController {
     }
   }
 
-  // Login user
   async login(ctx) {
     try {
       const userData = ctx.request.body;
@@ -30,7 +28,6 @@ class AuthController {
     }
   }
 
-  // Get current user info
   async getMe(ctx) {
     try {
       const userId = ctx.state.user.id;
@@ -43,7 +40,6 @@ class AuthController {
     }
   }
 
-  // Error handler
   handleError(ctx, error) {
     if (error.status) {
       ctx.response.status = error.status;

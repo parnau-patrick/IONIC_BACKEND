@@ -22,31 +22,28 @@ class Database {
     );
   }
 
-  // Connect to database and sync
   async connect() {
     try {
       await this.sequelize.authenticate();
-      console.log('✅ PostgreSQL connected successfully');
+      console.log('PostgreSQL connected successfully');
       
       await this.sequelize.sync({ alter: true });
-      console.log('✅ Database synchronized');
+      console.log('Database synchronized');
     } catch (error) {
-      console.error('❌ PostgreSQL connection error:', error);
+      console.error('PostgreSQL connection error:', error);
       throw error;
     }
   }
 
-  // Disconnect from database
   async disconnect() {
     try {
       await this.sequelize.close();
-      console.log('✅ PostgreSQL disconnected');
+      console.log('PostgreSQL disconnected');
     } catch (error) {
-      console.error('❌ PostgreSQL disconnect error:', error);
+      console.error('PostgreSQL disconnect error:', error);
     }
   }
 
-  // Get Sequelize instance
   getSequelize() {
     return this.sequelize;
   }

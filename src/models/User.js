@@ -2,7 +2,6 @@ const { DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
 const database = require('../config/database');
 
-// User Model
 const User = database.getSequelize().define('User', {
   id: {
     type: DataTypes.INTEGER,
@@ -35,7 +34,6 @@ const User = database.getSequelize().define('User', {
   timestamps: true
 });
 
-// Hook pentru hash password înainte de create
 User.beforeCreate(async (user) => {
   if (user.password) {
     const salt = await bcrypt.genSalt(10);
@@ -43,7 +41,6 @@ User.beforeCreate(async (user) => {
   }
 });
 
-// Method pentru comparare password
 User.prototype.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
