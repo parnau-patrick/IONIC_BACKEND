@@ -1,7 +1,8 @@
 const { DataTypes } = require('sequelize');
 const database = require('../config/database');
 
-const ItemModel = database.getSequelize().define('Item', {
+// Item Model - exact ca în proiectul original dar cu userId
+const Item = database.getSequelize().define('Item', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -15,10 +16,10 @@ const ItemModel = database.getSequelize().define('Item', {
       len: [3, 200]
     }
   },
-  date: {
-    type: DataTypes.DATE,
+  completed: {
+    type: DataTypes.BOOLEAN,
     allowNull: false,
-    defaultValue: DataTypes.NOW
+    defaultValue: false
   },
   version: {
     type: DataTypes.INTEGER,
@@ -28,22 +29,27 @@ const ItemModel = database.getSequelize().define('Item', {
       min: 1
     }
   },
-  completed: {
-    type: DataTypes.BOOLEAN,
+  userId: {
+    type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: false
+    references: {
+      model: 'users',
+      key: 'id'
+    }
   }
 }, {
   tableName: 'items',
-  timestamps: false
+  timestamps: true 
 });
 
-ItemModel.prototype.toggleCompleted = function() {
+// Method pentru toggle completed (ca în original)
+Item.prototype.toggleCompleted = function() {
   this.completed = !this.completed;
 };
 
-ItemModel.prototype.incrementVersion = function() {
+// Method pentru incrementare versiune (ca în original)
+Item.prototype.incrementVersion = function() {
   this.version += 1;
 };
 
-module.exports = ItemModel;
+module.exports = Item;

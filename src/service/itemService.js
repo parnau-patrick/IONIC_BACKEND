@@ -1,11 +1,23 @@
 const ItemValidator = require('../validation/itemValidator');
 
+// Item Service - business logic layer (exact ca în original dar cu userId)
 class ItemService {
   constructor(itemRepository) {
     this.repository = itemRepository;
   }
 
-  async getAllItems(searchText = null) {
+  // Obține toate items pentru user cu paginare și filtrare
+  async getAllItems(userId, searchText = null, completed = null, page = 1, limit = 10) {
+    // Validare pagination
+    const paginationValidation = ItemValidator.validatePagination(page, limit);
+    if (!paginationValidation.isValid) {
+      throw {
+        status: 400,
+        message: paginationValidation.errors.join(', ')
+      };
+    }
+
+    // Dacă există search text
     if (searchText) {
       const validation = ItemValidator.validateSearchText(searchText);
       if (!validation.isValid) {
@@ -14,12 +26,20 @@ class ItemService {
           message: validation.errors.join(', ')
         };
       }
-      return await this.repository.findByText(searchText);
+      return await this.repository.findByText(searchText, userId, page, limit);
     }
-    return await this.repository.findAll();
+
+    // Dacă există filter pentru completed
+    if (completed !== null && completed !== undefined) {
+      return await this.repository.findByCompleted(completed, userId, page, limit);
+    }
+
+    // Altfel returnează toate
+    return await this.repository.findAll(userId, page, limit);
   }
 
-  async getItemById(id) {
+  // Obține item după ID
+  async getItemById(id, userId) {
     const validation = ItemValidator.validateId(id);
     if (!validation.isValid) {
       throw {
@@ -28,7 +48,7 @@ class ItemService {
       };
     }
 
-    const item = await this.repository.findById(id);
+    const item = await this.repository.findById(id, userId);
     
     if (!item) {
       throw {
@@ -40,7 +60,8 @@ class ItemService {
     return item;
   }
 
-  async createItem(itemData) {
+  // Creează item nou
+  async createItem(itemData, userId) {
     const validation = ItemValidator.validateForCreate(itemData);
     if (!validation.isValid) {
       throw {
@@ -52,14 +73,15 @@ class ItemService {
     const newItem = await this.repository.save({
       text: itemData.text,
       completed: itemData.completed || false,
-      date: new Date(),
+      userId,
       version: 1
     });
     
     return newItem;
   }
 
-  async updateItem(id, itemData, clientVersion) {
+  // Update item
+  async updateItem(id, itemData, userId, clientVersion) {
     const idValidation = ItemValidator.validateId(id);
     if (!idValidation.isValid) {
       throw {
@@ -68,12 +90,16 @@ class ItemService {
       };
     }
 
-    const existingItem = await this.repository.findById(id);
+    const existingItem = await this.repository.findById(id, userId);
     
     if (!existingItem) {
-      return await this.createItem(itemData);
+      throw {
+        status: 404,
+        message: `Item with id ${id} not found`
+      };
     }
     
+    // Verificare version conflict (optimistic locking)
     const conflictCheck = ItemValidator.validateVersionConflict(clientVersion, existingItem.version);
     if (conflictCheck.hasConflict) {
       throw {
@@ -90,22 +116,18 @@ class ItemService {
       };
     }
 
-    // Verifică dacă doar completed s-a schimbat (toggle)
-    const onlyCompletedChanged = 
-      itemData.text === existingItem.text && 
-      itemData.completed !== existingItem.completed;
-
-    const updatedItem = await this.repository.update(id, {
-      text: itemData.text,
-      completed: itemData.completed,
-      date: onlyCompletedChanged ? existingItem.date : new Date(),
-      version: onlyCompletedChanged ? existingItem.version : existingItem.version + 1
+    // Update item cu incrementare versiune
+    const updatedItem = await this.repository.update(id, userId, {
+      text: itemData.text !== undefined ? itemData.text : existingItem.text,
+      completed: itemData.completed !== undefined ? itemData.completed : existingItem.completed,
+      version: existingItem.version + 1 // Întotdeauna incrementăm versiunea
     });
     
     return updatedItem;
   }
 
-  async deleteItem(id) {
+  // Delete item
+  async deleteItem(id, userId) {
     const validation = ItemValidator.validateId(id);
     if (!validation.isValid) {
       throw {
@@ -114,7 +136,7 @@ class ItemService {
       };
     }
 
-    const deletedItem = await this.repository.delete(id);
+    const deletedItem = await this.repository.delete(id, userId);
     
     if (!deletedItem) {
       throw {
@@ -126,18 +148,19 @@ class ItemService {
     return deletedItem;
   }
 
-  async getLastUpdated() {
-    return await this.repository.getLastUpdated();
+  // Obține ultima actualizare pentru user
+  async getLastUpdated(userId) {
+    return await this.repository.getLastUpdated(userId);
   }
 
-  async getCompletedItems() {
-    const items = await this.repository.findAll();
-    return items.filter(item => item.completed);
+  // Obține item-urile completed pentru user
+  async getCompletedItems(userId, page = 1, limit = 10) {
+    return await this.repository.findByCompleted(true, userId, page, limit);
   }
 
-  async getIncompleteItems() {
-    const items = await this.repository.findAll();
-    return items.filter(item => !item.completed);
+  // Obține item-urile incomplete pentru user
+  async getIncompleteItems(userId, page = 1, limit = 10) {
+    return await this.repository.findByCompleted(false, userId, page, limit);
   }
 }
 
