@@ -8,6 +8,8 @@ class ItemRoutes {
   }
 
   setupRoutes() {
+    this.router.get('/api/items/statistics', (ctx) => this.controller.getStatistics(ctx));
+    
     this.router.get('/api/items', (ctx) => this.controller.getAllItems(ctx));
     
     this.router.get('/api/items/:id', (ctx) => this.controller.getItemById(ctx));
@@ -29,3 +31,7 @@ class ItemRoutes {
 }
 
 module.exports = ItemRoutes;
+
+
+
+

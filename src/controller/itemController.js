@@ -7,16 +7,20 @@ class ItemController {
   async getAllItems(ctx) {
     try {
       const userId = ctx.state.user.id;
-      
       const page = parseInt(ctx.request.query.page) || 1;
       const limit = parseInt(ctx.request.query.limit) || 10;
       
-      const searchText = ctx.request.query.text || null;
-      const completed = ctx.request.query.completed !== undefined 
-        ? ctx.request.query.completed === 'true' 
-        : null;
+      const filters = {
+        text: ctx.request.query.text || null,
+        completed: ctx.request.query.completed !== undefined 
+          ? ctx.request.query.completed === 'true' 
+          : null,
+        dateFilter: ctx.request.query.dateFilter || null,
+        customStart: ctx.request.query.customStart || null,
+        customEnd: ctx.request.query.customEnd || null
+      };
 
-      const result = await this.service.getAllItems(userId, searchText, completed, page, limit);
+      const result = await this.service.getAllItems(userId, filters, page, limit);
       
       ctx.response.status = 200;
       ctx.response.body = result;
@@ -43,7 +47,7 @@ class ItemController {
     try {
       const userId = ctx.state.user.id;
       const itemData = ctx.request.body;
-      const connectionId = ctx.request.headers['x-connection-id']; // ← OBȚINE connectionId
+      const connectionId = ctx.request.headers['x-connection-id'];
       
       const newItem = await this.service.createItem(itemData, userId);
       
@@ -55,7 +59,7 @@ class ItemController {
           event: 'created',
           userId,
           payload: { item: newItem }
-        }, connectionId); 
+        }, connectionId);
       }
     } catch (error) {
       this.handleError(ctx, error);
@@ -68,7 +72,7 @@ class ItemController {
       const id = ctx.params.id;
       const itemData = ctx.request.body;
       const clientVersion = parseInt(ctx.request.get('ETag')) || itemData.version;
-      const connectionId = ctx.request.headers['x-connection-id']; // ← OBȚINE connectionId
+      const connectionId = ctx.request.headers['x-connection-id'];
       
       const updatedItem = await this.service.updateItem(id, itemData, userId, clientVersion);
       
@@ -91,7 +95,7 @@ class ItemController {
     try {
       const userId = ctx.state.user.id;
       const id = ctx.params.id;
-      const connectionId = ctx.request.headers['x-connection-id']; 
+      const connectionId = ctx.request.headers['x-connection-id'];
       
       const deletedItem = await this.service.deleteItem(id, userId);
       
@@ -106,8 +110,20 @@ class ItemController {
           event: 'deleted',
           userId,
           payload: { item: deletedItem }
-        }, connectionId); 
+        }, connectionId);
       }
+    } catch (error) {
+      this.handleError(ctx, error);
+    }
+  }
+
+  async getStatistics(ctx) {
+    try {
+      const userId = ctx.state.user.id;
+      const stats = await this.service.getDateStatistics(userId);
+      
+      ctx.response.status = 200;
+      ctx.response.body = stats;
     } catch (error) {
       this.handleError(ctx, error);
     }

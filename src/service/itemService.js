@@ -5,7 +5,8 @@ class ItemService {
     this.repository = itemRepository;
   }
 
-  async getAllItems(userId, searchText = null, completed = null, page = 1, limit = 10) {
+  
+  async getAllItems(userId, filters = {}, page = 1, limit = 10) {
     const paginationValidation = ItemValidator.validatePagination(page, limit);
     if (!paginationValidation.isValid) {
       throw {
@@ -14,22 +15,31 @@ class ItemService {
       };
     }
 
-    if (searchText) {
-      const validation = ItemValidator.validateSearchText(searchText);
+    if (filters.text) {
+      const validation = ItemValidator.validateSearchText(filters.text);
       if (!validation.isValid) {
         throw {
           status: 400,
           message: validation.errors.join(', ')
         };
       }
-      return await this.repository.findByText(searchText, userId, page, limit);
     }
 
-    if (completed !== null && completed !== undefined) {
-      return await this.repository.findByCompleted(completed, userId, page, limit);
+    if (filters.dateFilter) {
+      const validation = ItemValidator.validateDateFilter(
+        filters.dateFilter, 
+        filters.customStart, 
+        filters.customEnd
+      );
+      if (!validation.isValid) {
+        throw {
+          status: 400,
+          message: validation.errors.join(', ')
+        };
+      }
     }
 
-    return await this.repository.findAll(userId, page, limit);
+    return await this.repository.findAllWithFilters(userId, filters, page, limit);
   }
 
   async getItemById(id, userId) {
@@ -65,6 +75,7 @@ class ItemService {
     const newItem = await this.repository.save({
       text: itemData.text,
       completed: itemData.completed || false,
+      dueDate: itemData.dueDate || null,
       userId,
       version: 1
     });
@@ -109,7 +120,8 @@ class ItemService {
     const updatedItem = await this.repository.update(id, userId, {
       text: itemData.text !== undefined ? itemData.text : existingItem.text,
       completed: itemData.completed !== undefined ? itemData.completed : existingItem.completed,
-      version: existingItem.version + 1 
+      dueDate: itemData.dueDate !== undefined ? itemData.dueDate : existingItem.dueDate,
+      version: existingItem.version + 1
     });
     
     return updatedItem;
@@ -134,6 +146,10 @@ class ItemService {
     }
     
     return deletedItem;
+  }
+
+  async getDateStatistics(userId) {
+    return await this.repository.getDateStatistics(userId);
   }
 
   async getLastUpdated(userId) {

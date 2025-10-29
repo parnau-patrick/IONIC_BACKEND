@@ -35,10 +35,18 @@ const Item = database.getSequelize().define('Item', {
       model: 'users',
       key: 'id'
     }
+  },
+
+  dueDate: {
+    type: DataTypes.DATE,
+    allowNull: true,  
+    validate: {
+      isDate: true
+    }
   }
 }, {
   tableName: 'items',
-  timestamps: true 
+  timestamps: true
 });
 
 Item.prototype.toggleCompleted = function() {
@@ -47,6 +55,11 @@ Item.prototype.toggleCompleted = function() {
 
 Item.prototype.incrementVersion = function() {
   this.version += 1;
+};
+
+Item.prototype.isOverdue = function() {
+  if (!this.dueDate) return false;
+  return new Date(this.dueDate) < new Date() && !this.completed;
 };
 
 module.exports = Item;

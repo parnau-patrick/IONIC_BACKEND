@@ -1,0 +1,11 @@
+IONIC 1&2
+
+API RESTful pentru autentificare (register/login)
+
+API pentru management-ul produselor (CRUD iteme)
+
+Validari backend pentru datele primite din frontend
+
+Arhitectura modulara (controller, routes, models, middleware, services)
+
+Suport pentru extensie rapida cu alte entitati (ex: comenzi, utilizatori suplimentari)
